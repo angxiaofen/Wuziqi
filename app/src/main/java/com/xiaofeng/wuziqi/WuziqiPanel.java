@@ -143,10 +143,9 @@ public class WuziqiPanel extends View {
         if (isBlackWin || isWhiteWin){
             mIsGameOver = true;
             mIsWhiteWinner = isWhiteWin;
+            String text = isWhiteWin ? "白棋胜利" : "黑棋胜利";
+            Toast.makeText(getContext(), text, Toast.LENGTH_SHORT).show();
         }
-
-        String text = isWhiteWin ? "白棋胜利" : "黑棋胜利";
-        Toast.makeText(getContext(),text,Toast.LENGTH_SHORT).show();
     }
 
     private boolean checkFiveInLine(ArrayList<Point> points) {
