@@ -9,6 +9,7 @@ import android.graphics.Point;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -16,6 +17,7 @@ import java.util.ArrayList;
  * Created by xiaofeng on 2016/4/8.
  */
 public class WuziqiPanel extends View {
+    private static final int MAX_COUNT_IN_LINE = 5;
     private int MAX_LINE = 10;  //棋盘网格线的最大数
     private float mLineHeight ;  //每个格的高度
     private int mPanelHeight ; //panel的高度
@@ -29,7 +31,9 @@ public class WuziqiPanel extends View {
     private ArrayList<Point> mBlackPieces = new ArrayList<>(); // 黑棋的集合
     private Bitmap mWhitePiece , mBlackPiece;  // 白棋黑棋
 
-    private boolean mIsWhite = true ; // 白棋先行轮到白棋子落子
+    private boolean mIsWhite = true ; // 白棋先行或轮到白棋子落子
+    private boolean mIsGameOver ;  // 游戏结束
+    private boolean mIsWhiteWinner ; // 白棋胜利
 
 
     public WuziqiPanel(Context context, AttributeSet attrs) {
@@ -86,6 +90,10 @@ public class WuziqiPanel extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        //游戏结束直接返回,终止游戏
+        if (mIsGameOver){
+            return false;
+        }
         int action = event.getAction();
         if (action == MotionEvent.ACTION_UP){
             int x = (int) event.getX();
@@ -121,6 +129,157 @@ public class WuziqiPanel extends View {
         super.onDraw(canvas);
         drawBoard(canvas);  //绘制棋盘
         drawPieces(canvas); //绘制棋子
+
+        checkGameOver();
+    }
+
+    /*
+    * 检查游戏是否结束
+    * */
+    private void checkGameOver() {
+        boolean isWhiteWin = checkFiveInLine(mWhitePieces);
+        boolean isBlackWin = checkFiveInLine(mBlackPieces);
+
+        if (isBlackWin || isWhiteWin){
+            mIsGameOver = true;
+            mIsWhiteWinner = isWhiteWin;
+        }
+
+        String text = isWhiteWin ? "白棋胜利" : "黑棋胜利";
+        Toast.makeText(getContext(),text,Toast.LENGTH_SHORT).show();
+    }
+
+    private boolean checkFiveInLine(ArrayList<Point> points) {
+        for(Point p:points){
+            int x = p.x;
+            int y = p.y;
+
+            boolean win ;
+
+            win = checkHorizontal(x, y, points);
+            if (win) return true;
+
+            win = checkVertical(x, y, points);
+            if (win) return true;
+
+            win = checkLeftDiagonal(x, y, points);
+            if (win) return true;
+
+            win = checkRightDiagonal(x,y,points);
+            if (win) return true;
+
+        }
+        return false;
+    }
+
+    /*
+   * 检查右斜方是否五子连线
+   * */
+    private boolean checkRightDiagonal(int x, int y, ArrayList<Point> points) {
+        int count = 1;
+        //右下
+        for (int i=1;i<MAX_COUNT_IN_LINE;i++){
+            if (points.contains(new Point(x+i,y+i))){
+                count++;
+            }else {
+                break;
+            }
+        }
+        //右上
+        for (int i=1;i<MAX_COUNT_IN_LINE;i++){
+            if (points.contains(new Point(x-i,y-i))){
+                count++;
+            }else{
+                break;
+            }
+        }
+        if (count == MAX_COUNT_IN_LINE){
+            return true;
+        }
+        return false;
+    }
+
+    /*
+   * 检查左斜方是否五子连线
+   * */
+    private boolean checkLeftDiagonal(int x, int y, ArrayList<Point> points) {
+        int count = 1;
+        //左下
+        for (int i=1;i<MAX_COUNT_IN_LINE;i++){
+            if (points.contains(new Point(x-i,y+i))){
+                count++;
+            }else {
+                break;
+            }
+        }
+        //左上
+        for (int i=1;i<MAX_COUNT_IN_LINE;i++){
+            if (points.contains(new Point(x+i,y-i))){
+                count++;
+            }else{
+                break;
+            }
+        }
+        if (count == MAX_COUNT_IN_LINE){
+            return true;
+        }
+        return false;
+    }
+
+    /*
+   * 检查横向是否五子连线
+   * */
+    private boolean checkHorizontal(int x, int y, ArrayList<Point> points) {
+        int count = 1;
+        //向右
+        for (int i = 1;i<MAX_COUNT_IN_LINE;i++)
+        {
+            if (points.contains(new Point(x+i,y))){
+                count++;
+            }else{
+                break;
+            }
+        }
+        //向左
+        for (int i = 1;i<MAX_COUNT_IN_LINE;i++){
+            if (points.contains(new Point(x-i,y))){
+                count++;
+            }else{
+                break;
+            }
+        }
+        if (count == MAX_COUNT_IN_LINE){
+            return true;
+        }
+        return false;
+    }
+
+    /*
+    * 检查竖向是否五子连线
+    * */
+    private boolean checkVertical(int x, int y, ArrayList<Point> points) {
+        int count = 1;
+        //向下
+        for (int i = 1;i<MAX_COUNT_IN_LINE;i++)
+        {
+            if (points.contains(new Point(x,y+i))){
+                count++;
+            }else{
+                break;
+            }
+        }
+        //向上
+        for (int i = 1;i<MAX_COUNT_IN_LINE;i++){
+            if (points.contains(new Point(x,y-i))){
+                count++;
+            }else{
+                break;
+            }
+        }
+        if (count == MAX_COUNT_IN_LINE){
+            return true;
+        }
+        return false;
     }
 
     /*
