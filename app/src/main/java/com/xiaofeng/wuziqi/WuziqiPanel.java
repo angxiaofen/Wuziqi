@@ -6,6 +6,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -87,6 +89,46 @@ public class WuziqiPanel extends View {
         mBlackPiece = Bitmap.createScaledBitmap(mBlackPiece,mPieceWidth,mPieceWidth,false);
     }
 
+    private static final String INSTANCE = "INSTANCE";
+    private static final String INSTANCE_IS_GAME_OVER = "INSTANCE_IS_GAME_OVER";
+    private static final String INSTANCE_WHITE_PIECES = "INSTANCE_WHITE_PIECES";
+    private static final String INSTANCE_BLACK_PIECES = "INSTANCE_BLACK_PIECES";
+
+    /*
+    * View 的存储与恢复
+    * */
+    @Override
+    protected Parcelable onSaveInstanceState() {
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(INSTANCE,super.onSaveInstanceState());
+        bundle.putBoolean(INSTANCE_IS_GAME_OVER,mIsGameOver);
+        bundle.putParcelableArrayList(INSTANCE_WHITE_PIECES, mWhitePieces);
+        bundle.putParcelableArrayList(INSTANCE_BLACK_PIECES,mBlackPieces);
+        return bundle;
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Parcelable state) {
+        if (state instanceof Bundle){
+            Bundle bundle = (Bundle) state;
+            mIsGameOver = bundle.getBoolean(INSTANCE_IS_GAME_OVER);
+            mWhitePieces = bundle.getParcelableArrayList(INSTANCE_WHITE_PIECES);
+            mBlackPieces = bundle.getParcelableArrayList(INSTANCE_BLACK_PIECES);
+            super.onRestoreInstanceState(bundle.getBundle(INSTANCE));
+            return;
+        }
+        super.onRestoreInstanceState(state);
+    }
+
+    /*
+    * 开始游戏
+    * */
+    public void start(){
+        mWhitePieces.clear();
+        mBlackPieces.clear();
+        mIsGameOver = false;
+        invalidate();
+    }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
