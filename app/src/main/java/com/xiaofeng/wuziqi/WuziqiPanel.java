@@ -40,7 +40,7 @@ public class WuziqiPanel extends View {
 
     public WuziqiPanel(Context context, AttributeSet attrs) {
         super(context, attrs);
-        setBackgroundColor(0x44ff0000);
+        //setBackgroundColor(0x44ff0000);
 
         init();
     }
